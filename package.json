@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "deploy": "npm run build && gcloud app deploy"
+    "deploy": "npm i && npx prisma generate && npm run build && gcloud app deploy"
   },
   "keywords": [],
   "author": "",
