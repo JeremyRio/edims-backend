@@ -10,7 +10,7 @@ automatic_scaling:
   max_pending_latency: automatic # Adjust based on your performance requirements
 
 env_variables:
-  DATABASE_URL: "mysql://j17ydk8tpkcei9fjm0rj:pscale_pw_X8SgizDsormNNS4g6lcjXTbikURp1DKgxiaF9oRC2EM@aws.connect.psdb.cloud/edims?sslaccept=strict"
+  DATABASE_URL: "mysql://gn7uzahkslcltltg7b0h:pscale_pw_oDurpab6YFswSDNjcBMuB2luLoj4mcvVJMtnyhKwS7Y@aws.connect.psdb.cloud/edims?sslaccept=strict"
   JWT_SECRET: "yw3FHwo2yAYIG7Fp0UrInRQgc6d9nSiDzG54x80HOgmjg2Hnu3fdmRaKdabYXTD1ylAb8sXgBD6TxkcflXEvSw=="
   PORT: "8080"
 

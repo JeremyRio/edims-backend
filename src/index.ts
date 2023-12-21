@@ -35,7 +35,9 @@ app.post("/register", async (req: Request, res: Response) => {
       },
     });
     const { password: _, ...userWithoutPassword } = newUser;
-    res.status(201).json({ user: userWithoutPassword });
+    res
+      .status(201)
+      .json({ message: "Register success", user: userWithoutPassword });
   } catch (error) {
     res.status(400).json({ message: "Unable to register user" });
   }
@@ -72,8 +74,7 @@ app.get("/items", verifyToken, async (req: Request, res: Response) => {
         userid: userid,
       },
     });
-
-    res.status(200).json(items);
+    res.status(200).json({ message: "Item retrieve success", items: items });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });
