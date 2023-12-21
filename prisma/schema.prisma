@@ -17,3 +17,12 @@ model User {
   email    String @unique
   password String
 }
+
+model Item {
+  id       Int    @id @default(autoincrement())
+  userid   Int
+  name     String
+  image    String
+  category String
+  date     String
+}
