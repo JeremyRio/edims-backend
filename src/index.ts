@@ -38,6 +38,8 @@ app.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+
+
 app.post("/login", async (req: Request, res: Response) => {
   const { email, password }: LoginCredentials = req.body;
 
@@ -46,7 +48,6 @@ app.post("/login", async (req: Request, res: Response) => {
 
     if (user && bcrypt.compareSync(password, user.password)) {
       const token = generateToken(user.id);
-
       res.status(200).json({ message: "Login successful", token: token });
     } else {
       res.status(401).json({ message: "Invalid email or password" });
