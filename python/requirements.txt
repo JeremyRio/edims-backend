@@ -1,0 +1,4 @@
+fastapi[all]
+google-cloud-storage
+tensorflow
+uvicorn

@@ -1,0 +1,5 @@
+runtime: python310
+entrypoint: uvicorn main:app --host=0.0.0.0 --port=$PORT
+
+# Replace 'your-service-name' with the desired service name
+service: edims-model
