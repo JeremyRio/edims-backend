@@ -13,6 +13,33 @@ const bucket = storage.bucket("edims-item");
 const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Item
+ *   description: Item management
+ */
+
+/**
+ * @swagger
+ * /item/all:
+ *   get:
+ *     tags: [Item]
+ *     summary: Retrieve all items
+ *     description: Fetches all items for the authenticated user.
+ *     responses:
+ *       200:
+ *         description: List of items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Item'
+ *       500:
+ *         description: Internal server error
+ */
+
 router.get("/all", verifyToken, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
@@ -27,6 +54,38 @@ router.get("/all", verifyToken, async (req: Request, res: Response) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+
+/**
+ * @swagger
+ * /item:
+ *   post:
+ *     tags: [Item]
+ *     summary: Create a new item
+ *     description: Adds a new item with an image, name, category, and date.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Item successfully created
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Internal server error
+ */
 
 router.post(
   "/",
@@ -85,6 +144,31 @@ router.post(
     }
   }
 );
+
+/**
+ * @swagger
+ * /item/{id}:
+ *   delete:
+ *     tags: [Item]
+ *     summary: Delete an item
+ *     description: Deletes an item by ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Item ID
+ *     responses:
+ *       200:
+ *         description: Item deleted successfully
+ *       401:
+ *         description: Unauthorized deletion
+ *       404:
+ *         description: Item not found
+ *       500:
+ *         description: Internal server error
+ */
 
 router.delete("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
