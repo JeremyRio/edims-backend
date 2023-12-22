@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { generateToken, verifyToken } from "./authentication";
 import { Storage } from "@google-cloud/storage";
 import dotenv from "dotenv";
+import multer from "multer";
 
 dotenv.config();
 
@@ -14,6 +15,8 @@ const prisma = new PrismaClient();
 const storage = new Storage({
   keyFilename: "./service-account.json",
 });
+const bucket = storage.bucket("edims-item");
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
 
@@ -66,12 +69,10 @@ app.post("/login", async (req: Request, res: Response) => {
 
 app.get("/items", verifyToken, async (req: Request, res: Response) => {
   try {
-    const userReq = req as Request & { user: UserWithoutPassword };
-    const userid = userReq.user.id;
-
+    const user = (req as any).user;
     const items = await prisma.item.findMany({
       where: {
-        userid: userid,
+        userid: user.user.id,
       },
     });
     res.status(200).json({ message: "Item retrieve success", items: items });
@@ -81,15 +82,64 @@ app.get("/items", verifyToken, async (req: Request, res: Response) => {
   }
 });
 
-app.post("/item", verifyToken, async (req: Request, res: Response) => {
-  try {
-    const userReq = req as Request & { user: UserWithoutPassword };
-    const { name, image, category, date } = req.body;
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Internal server error" });
+app.post(
+  "/item",
+  verifyToken,
+  upload.single("image"),
+  async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { name, category } = req.body;
+      const file = req.file;
+
+      if (!file || !name || !category) {
+        return res.status(400).send({ message: "All fields are required." });
+      }
+
+      const bucketfilename = `${user.user.id}/items/${Date.now()}-${
+        file.originalname
+      }`;
+
+      const blob = bucket.file(bucketfilename);
+      const blobStream = blob.createWriteStream({
+        metadata: {
+          contentType: file.mimetype,
+        },
+        resumable: false,
+      });
+
+      blobStream.on("error", (err) => {
+        console.error(err);
+        return res
+          .status(500)
+          .send({ message: "Error uploading to Google Cloud Storage" });
+      });
+
+      blobStream.on("finish", async () => {
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+        const newItem = await prisma.item.create({
+          data: {
+            userid: user.user.id,
+            name: name,
+            image: publicUrl,
+            category: category,
+            date: "",
+          },
+        });
+
+        res
+          .status(201)
+          .json({ message: "Item successfully created", item: newItem });
+      });
+
+      blobStream.end(file.buffer);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: "Internal server error" });
+    }
   }
-});
+);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
