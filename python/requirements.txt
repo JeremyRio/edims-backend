@@ -2,3 +2,5 @@ fastapi[all]
 google-cloud-storage
 tensorflow
 uvicorn
+mltu==0.1.3
+cv2

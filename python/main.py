@@ -4,12 +4,33 @@ import tensorflow as tf
 from io import BytesIO
 
 app = FastAPI()
+import cv2
+import typing
+import numpy as np
 
-# Replace 'your-bucket-name' and 'your-model-filename' with your actual bucket and model file
-GCS_BUCKET_NAME = 'your-bucket-name'
-MODEL_FILENAME = 'your-model-filename'
+from mltu.inferenceModel import OnnxInferenceModel
+from mltu.utils.text_utils import ctc_decoder, get_cer
 
-# Load the TensorFlow model during app startup
+class ImageToWordModel(OnnxInferenceModel):
+    def __init__(self, char_list: typing.Union[str, list], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.char_list = char_list
+
+    def predict(self, image: np.ndarray):
+        image = cv2.resize(image, self.input_shape[:2][::-1])
+
+        image_pred = np.expand_dims(image, axis=0).astype(np.float32)
+
+        preds = self.model.run(None, {self.input_name: image_pred})[0]
+
+        text = ctc_decoder(preds, self.char_list)[0]
+
+        return text
+
+GCS_BUCKET_NAME = 'edims-item'
+MODEL_FILENAME = 'models/model.onnx'
+MODEL_DETECTION_FILENAME = 'models/frozen_east_text_detection.pb'
+
 model = None
 
 def download_model_from_gcs(bucket_name, model_filename):
@@ -28,6 +49,10 @@ def load_model():
 async def startup_event():
     global model
     model = load_model()
+
+@app.get("/")
+def read_root():
+    return {"MODEL_FILENAME": MODEL_FILENAME, "MODEL_DETECTION_FILENAME": MODEL_DETECTION_FILENAME, "GCS_BUCKET_NAME": GCS_BUCKET_NAME, "status": "OK"}
 
 # Endpoint for model prediction
 @app.get("/predict/{input_data}")
