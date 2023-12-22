@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { UserWithoutPassword } from "./interface";
+import { UserWithoutPassword } from "../interfaces/interface";
 import jwt from "jsonwebtoken";
 
 const generateToken = (user: UserWithoutPassword): string => {
