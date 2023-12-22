@@ -84,6 +84,7 @@ app.get("/items", verifyToken, async (req: Request, res: Response) => {
 app.post("/item", verifyToken, async (req: Request, res: Response) => {
   try {
     const userReq = req as Request & { user: UserWithoutPassword };
+    const { name, image, category, date } = req.body;
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });
