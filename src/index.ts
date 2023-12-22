@@ -102,10 +102,10 @@ app.post(
   async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
-      const { name, category } = req.body;
+      const { name, category, date } = req.body;
       const file = req.file;
 
-      if (!file || !name || !category) {
+      if (!date || !file || !name || !category) {
         return res.status(400).send({ message: "All fields are required." });
       }
 
@@ -137,10 +137,9 @@ app.post(
             name: name,
             image: publicUrl,
             category: category,
-            date: "",
+            date: date,
           },
         });
-
         res
           .status(201)
           .json({ message: "Item successfully created", item: newItem });
